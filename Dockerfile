@@ -1,4 +1,4 @@
- #Use Python 3.9 slim image
+ # Use Python 3.9 slim image
 FROM python:3.9-slim
 
 # Set working directory
@@ -31,4 +31,4 @@ EXPOSE 8080
 HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
 
 # Run the Flask app
-CMD ["python", "app.py"]
+CMD ["sh", "-c", "python app.py"]

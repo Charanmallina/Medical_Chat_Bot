@@ -18,10 +18,13 @@ load_dotenv()
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-if not PINECONE_API_KEY:
-    raise ValueError("PINECONE_API_KEY environment variable is required")
-if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY environment variable is required")
+# if not PINECONE_API_KEY:
+#     raise ValueError("PINECONE_API_KEY environment variable is required")
+# if not GROQ_API_KEY:
+#     raise ValueError("GROQ_API_KEY environment variable is required")
+
+if not PINECONE_API_KEY or not GROQ_API_KEY:
+    print("⚠️ Warning: API keys not set. The app may not function fully.")
 
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 os.environ["GROQ_API_KEY"] = GROQ_API_KEY

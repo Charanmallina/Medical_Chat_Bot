@@ -22,22 +22,22 @@ os.environ["GROQ_API_KEY"] = GROQ_API_KEY or ""
 rag_chain = None
 
 def init_chain():
-    """Initialize the model & Pinecone lazily."""
     global rag_chain
     if rag_chain is None:
         from src.helper import download_embeddings
-        print("Initializing model and Pinecone...")
+        print("Starting model download...")
         embeddings = download_embeddings()
+        print("Model loaded.")
+        print("Connecting to Pinecone...")
         docsearch = PineconeVectorStore.from_existing_index(
             index_name="medical-chatbot",
             embedding=embeddings
         )
+        print("Pinecone connected.")
         retriever = docsearch.as_retriever(search_type="similarity", search_kwargs={"k": 3})
         llm = ChatGroq(model="llama-3.1-8b-instant")
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            ("human", "{input}")
-        ])
+        print("Groq model initialized.")
+        prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", "{input}")])
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
         rag_chain = create_retrieval_chain(retriever, question_answer_chain)
         print("Initialization complete.")

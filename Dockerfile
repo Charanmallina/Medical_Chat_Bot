@@ -31,4 +31,4 @@ EXPOSE 8080
 HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
 
 # Run the Flask app
-CMD ["sh", "-c", "python app.py"]
+CMD ["python app.py"]

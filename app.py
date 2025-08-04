@@ -20,33 +20,36 @@ os.environ["GROQ_API_KEY"] = GROQ_API_KEY or ""
 
 # Lazy init variables
 rag_chain = None
-
 def init_chain():
     global rag_chain
     if rag_chain is None:
-        from src.helper import download_embeddings
-        print("Starting model download...")
-        embeddings = download_embeddings()
-        print("Model loaded.")
-        print("Connecting to Pinecone...")
-        docsearch = PineconeVectorStore.from_existing_index(
-            index_name="medical-chatbot",
-            embedding=embeddings
-        )
-        print("Pinecone connected.")
-        retriever = docsearch.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-        llm = ChatGroq(model="llama-3.1-8b-instant")
-        print("Groq model initialized.")
-        prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", "{input}")])
-        question_answer_chain = create_stuff_documents_chain(llm, prompt)
-        rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-        print("Initialization complete.")
+        try:
+            from src.helper import download_embeddings
+            print(">>> Starting model download...")
+            embeddings = download_embeddings()
+            print(">>> Model loaded.")
+            print(">>> Connecting to Pinecone...")
+            docsearch = PineconeVectorStore.from_existing_index(
+                index_name="medical-chatbot",
+                embedding=embeddings
+            )
+            print(">>> Pinecone connected.")
+            retriever = docsearch.as_retriever(search_type="similarity", search_kwargs={"k": 3})
+            print(">>> Initializing Groq model...")
+            llm = ChatGroq(model="llama-3.1-8b-instant")
+            print(">>> Groq model initialized.")
+            prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", "{input}")])
+            question_answer_chain = create_stuff_documents_chain(llm, prompt)
+            rag_chain = create_retrieval_chain(retriever, question_answer_chain)
+            print(">>> Initialization complete.")
+        except Exception as e:
+            print(f"!!! ERROR during init_chain: {e}")
+            raise
 
 # --- Routes ---
 @app.route("/")
 def index():
-    return "<h2>Medical Chatbot is running!</h2><p>Use /get?msg=Hello or POST to /get</p>"
-
+     return render_template('chat.html')
 @app.route("/health")
 def health():
     return jsonify({'status': 'healthy'}), 200

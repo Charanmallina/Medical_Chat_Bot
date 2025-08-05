@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
 from threading import Thread
-import pinecone  # Added for fail-fast index checks
+from pinecone import Pinecone  # Updated Pinecone import
 
 from langchain_pinecone import PineconeVectorStore
 from langchain_groq import ChatGroq
@@ -33,8 +33,8 @@ def init_chain():
             print(">>> Model loaded.")
 
             print(">>> Connecting to Pinecone...")
-            pinecone.init(api_key=os.environ["PINECONE_API_KEY"])
-            if "medical-chatbot" not in pinecone.list_indexes():
+            pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+            if "medical-chatbot" not in pc.list_indexes().names():
                 raise Exception("Pinecone index 'medical-chatbot' not found.")
             docsearch = PineconeVectorStore.from_existing_index(
                 index_name="medical-chatbot",
@@ -83,11 +83,10 @@ def chat():
     else:  # GET
         msg = request.args.get("msg", "")
     if not msg:
-        return jsonify({"error": "No message provided"}), 400
+        return "Please provide a message"
     response = rag_chain.invoke({"input": msg})
-    return jsonify({"answer": response["answer"]})
+    return str(response["answer"])  # Return plain text instead of JSON
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
-
